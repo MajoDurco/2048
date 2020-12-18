@@ -59,12 +59,24 @@ export const placeValueOnBoard = (
   return newBoard
 }
 
-export const initializeBoard = (size: number = 4): Matrix => {
-  const emptyBoard = newEmptyMatrix(size)
-  return placeValueRandomlyOnBoard(
-    newRandomBoardValue(),
-    placeValueRandomlyOnBoard(newRandomBoardValue(), emptyBoard)
-  )
+export const initializeBoard = (
+  size: number = 4,
+  numberOfStones: number = 0
+): Matrix => {
+  let board = newEmptyMatrix(size)
+  // place stones
+  Array(numberOfStones)
+    .fill(0)
+    .forEach(() => {
+      board = placeValueRandomlyOnBoard(-1, board)
+    })
+  // place 2 initial values
+  Array(2)
+    .fill(0)
+    .forEach(() => {
+      board = placeValueRandomlyOnBoard(newRandomBoardValue(), board)
+    })
+  return board
 }
 
 export const isBoardFull = (board: Matrix): Boolean => {

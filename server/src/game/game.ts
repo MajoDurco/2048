@@ -16,12 +16,17 @@ export enum GameStatus {
 export type Game = {
   score: number
   status: GameStatus
+  stones: number
   board: Matrix
 }
 
-export const newGame = (boardSize: number = 4): Game => {
+export const newGame = (
+  boardSize: number = 4,
+  numberOfStones: number = 0
+): Game => {
   return {
-    board: initializeBoard(boardSize),
+    board: initializeBoard(boardSize, numberOfStones),
+    stones: numberOfStones,
     score: 0,
     status: GameStatus.ACTIVE,
   }

@@ -11,13 +11,16 @@ export const shiftValuesLeft = (m: Matrix): Matrix => {
   for (let i = 0; i < newMatrix.length; i++) {
     let lastNotEmptyIndex = 0
     for (let j = 0; j < newMatrix[0].length; j++) {
-      if (m[i][j] !== 0) {
+      if (m[i][j] > 0) {
         newMatrix[i][lastNotEmptyIndex] = m[i][j]
         // only replace with zero when we moved the value
         if (j !== lastNotEmptyIndex) {
           newMatrix[i][j] = 0
         }
         lastNotEmptyIndex += 1
+      }
+      if (m[i][j] < 0) {
+        lastNotEmptyIndex = j + 1
       }
     }
   }
@@ -29,7 +32,7 @@ export const mergeValuesLeft = (m: Matrix): MoveResponse => {
   let scoreUpdate = 0
   for (let i = 0; i < newMatrix.length; i++) {
     for (let j = 0; j < newMatrix[0].length; j++) {
-      if (newMatrix[i][j] == m[i][j + 1] && m[i][j] !== 0) {
+      if (newMatrix[i][j] === m[i][j + 1] && m[i][j] > 0) {
         newMatrix[i][j] *= 2
         scoreUpdate += newMatrix[i][j]
         newMatrix[i][j + 1] = 0

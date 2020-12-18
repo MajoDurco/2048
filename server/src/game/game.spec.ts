@@ -6,6 +6,7 @@ describe("move", () => {
     {
       game: {
         score: 0,
+        stones: 0,
         status: GameStatus.ACTIVE,
         board: [
           [0, 2],
@@ -21,6 +22,7 @@ describe("move", () => {
     {
       game: {
         score: 4,
+        stones: 0,
         status: GameStatus.ACTIVE,
         board: [
           [0, 2],
@@ -30,12 +32,14 @@ describe("move", () => {
       move: Move.DOWN,
       result: {
         score: 4 + 4,
+        stones: 0,
         status: GameStatus.ACTIVE,
       },
     },
     {
       game: {
         score: 4,
+        stones: 0,
         status: GameStatus.ACTIVE,
         board: [
           [4, 2],
@@ -51,6 +55,7 @@ describe("move", () => {
     {
       game: {
         score: 4,
+        stones: 0,
         status: GameStatus.LOSS,
         board: [
           [4, 2],
@@ -66,6 +71,7 @@ describe("move", () => {
     {
       game: {
         score: 4,
+        stones: 0,
         status: GameStatus.ACTIVE,
         board: [
           [1024, 1024],
@@ -81,6 +87,7 @@ describe("move", () => {
     {
       game: {
         score: 4,
+        stones: 0,
         status: GameStatus.ACTIVE,
         board: [
           [1024, 1024],

@@ -40,6 +40,16 @@ describe("shiftValuesLeft", () => {
       ],
     },
     {
+      input: [
+        [0, 2, 2, -1],
+        [0, -1, 0, 2],
+      ],
+      output: [
+        [2, 2, 0, -1],
+        [0, -1, 2, 0],
+      ],
+    },
+    {
       input: [[2, 2, 2, 2, 4, 4]],
       output: [[2, 2, 2, 2, 4, 4]],
     },
@@ -50,6 +60,14 @@ describe("shiftValuesLeft", () => {
     {
       input: [[0, 2, 2, 0, 0, 4]],
       output: [[2, 2, 4, 0, 0, 0]],
+    },
+    {
+      input: [[0, 2, 2, -1, 0, 4]],
+      output: [[2, 2, 0, -1, 4, 0]],
+    },
+    {
+      input: [[0, 2, -1, 2, -1, 4]],
+      output: [[2, 0, -1, 2, -1, 4]],
     },
   ]
 
@@ -129,6 +147,19 @@ describe("mergeValuesLeft", () => {
           [0, 4, 0, 2],
         ],
         scoreUpdate: 4 + 4,
+      },
+    },
+    {
+      input: [
+        [2, -1, 2, 2],
+        [0, 2, -1, 2],
+      ],
+      output: {
+        matrix: [
+          [2, -1, 4, 0],
+          [0, 2, -1, 2],
+        ],
+        scoreUpdate: 4,
       },
     },
   ]
@@ -313,6 +344,19 @@ describe("moveLeft", () => {
         scoreUpdate: 4 + 4,
       },
     },
+    {
+      input: [
+        [0, 2, -1, 0, 2],
+        [0, -1, 2, 2, 2],
+      ],
+      output: {
+        matrix: [
+          [2, 0, -1, 2, 0],
+          [0, -1, 4, 2, 0],
+        ],
+        scoreUpdate: 4,
+      },
+    },
   ]
 
   testCases.forEach((testCase, index) => {
@@ -382,12 +426,12 @@ describe("moveRight", () => {
     },
     {
       input: [
-        [0, 2, 0, 2],
+        [0, -1, 2, 2],
         [0, 2, 2, 2],
       ],
       output: {
         matrix: [
-          [0, 0, 0, 4],
+          [0, -1, 0, 4],
           [0, 0, 2, 4],
         ],
         scoreUpdate: 4 + 4,
@@ -455,6 +499,23 @@ describe("moveUp", () => {
         scoreUpdate: 16 + 16 + 4 + 8,
       },
     },
+    {
+      input: [
+        [0, 8, 2],
+        [0, -1, 8],
+        [2, -1, 4],
+        [2, 2, 4],
+      ],
+      output: {
+        matrix: [
+          [4, 8, 2],
+          [0, -1, 8],
+          [0, -1, 8],
+          [0, 2, 0],
+        ],
+        scoreUpdate: 12,
+      },
+    },
   ]
 
   testCases.forEach((testCase, index) => {
@@ -515,6 +576,23 @@ describe("moveDown", () => {
           [2, 4, 8],
         ],
         scoreUpdate: 16 + 4 + 16 + 8,
+      },
+    },
+    {
+      input: [
+        [0, 8, 2],
+        [0, -1, 8],
+        [2, -1, 4],
+        [2, 2, 4],
+      ],
+      output: {
+        matrix: [
+          [0, 8, 0],
+          [0, -1, 2],
+          [0, -1, 8],
+          [4, 2, 8],
+        ],
+        scoreUpdate: 12,
       },
     },
   ]

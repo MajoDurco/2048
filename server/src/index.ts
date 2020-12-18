@@ -1,8 +1,6 @@
 import { Move } from "./game/board"
 import { newGame, move, Game } from "./game/game"
 
-// const setIntervalPromise = util.promisify(setInterval)
-
 const printGame = (game: Game) => {
   console.log("Status:", game.status)
   console.log("Score:", game.score)
@@ -21,14 +19,12 @@ const findMostFrequent = (array: any[]): any => {
   })
 
   const hashToArray = Object.entries(hash)
-  console.log("h to array", hashToArray)
   const sortedArray = hashToArray.sort((x, y) => y[1] - x[1])
-  console.log("sortedArray", sortedArray)
   return sortedArray[0][0]
 }
 
 let gameMovesBuffer: Move[] = []
-let game = newGame(4)
+let game = newGame(4, 1)
 printGame(game)
 
 process.stdin.on("readable", () => {
@@ -65,4 +61,4 @@ setInterval(() => {
     game = move(game, nextMove)
     printGame(game)
   }
-}, 5 * 1000)
+}, 1 * 1000)
