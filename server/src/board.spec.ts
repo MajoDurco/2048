@@ -3,8 +3,10 @@ import {
   placeValueOnBoard,
   isBoardFull,
   boardHas2048,
+  makeMove,
   boardCanMove,
-} from "./game"
+  Move,
+} from "./board"
 import { newEmptyMatrix } from "./matrix"
 
 describe("randomBoardPosition", () => {
@@ -139,5 +141,36 @@ describe("boardCanMove", () => {
         [16, 4],
       ])
     ).toBeFalsy()
+  })
+})
+
+describe("makeMove", () => {
+  it("does not generate new random value on board when board does not change", () => {
+    expect(
+      makeMove(Move.UP, [
+        [0, 2],
+        [0, 4],
+      ])
+    ).toEqual({
+      matrix: [
+        [0, 2],
+        [0, 4],
+      ],
+      scoreUpdate: 0,
+    })
+  })
+  it("does not generate new random value on board when board does not change by right move", () => {
+    expect(
+      makeMove(Move.RIGHT, [
+        [0, 2],
+        [0, 4],
+      ])
+    ).toEqual({
+      matrix: [
+        [0, 2],
+        [0, 4],
+      ],
+      scoreUpdate: 0,
+    })
   })
 })

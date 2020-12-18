@@ -1,11 +1,19 @@
-import { makeMove, initializeBoard, Move } from "./game"
+import { Move } from "./board"
+import { newGame, move, Game } from "./game"
+
+const printGame = (game: Game) => {
+  console.log("Status:", game.status)
+  console.log("Score:", game.score)
+  console.table(game.board)
+}
+
+let game = newGame(4)
+printGame(game)
 
 process.stdin.on("readable", () => {
-  const k = Buffer.from(process.stdin.read(), "utf-8").toString("ascii").trim()
-  console.log("k", k)
-  console.log(k === "w")
+  const key = Buffer.from(process.stdin.read(), "utf-8").toString().trim()
   let nextMove = null
-  switch (k) {
+  switch (key) {
     case "w":
       nextMove = Move.UP
       break
@@ -23,10 +31,7 @@ process.stdin.on("readable", () => {
       break
   }
   if (nextMove !== null) {
-    board = makeMove(nextMove, board)
-    console.table(board)
+    game = move(game, nextMove)
+    printGame(game)
   }
 })
-
-let board = initializeBoard(4)
-console.table(board)

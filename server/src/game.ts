@@ -1,122 +1,49 @@
 import {
-  Matrix,
-  moveDown,
-  moveLeft,
-  moveRight,
-  moveUp,
-  newEmptyMatrix,
-} from "./matrix"
-import { deepArrayCopy, getRandomInt } from "./utils"
+  boardCanMove,
+  boardHas2048,
+  initializeBoard,
+  makeMove,
+  Move,
+} from "./board"
+import { Matrix } from "./matrix"
 
-export enum Move {
-  UP,
-  DOWN,
-  RIGHT,
-  LEFT,
+export enum GameStatus {
+  LOSS,
+  WIN,
+  ACTIVE,
 }
 
-const mapMoveToMoveFunction = {
-  [Move.UP]: moveUp,
-  [Move.DOWN]: moveDown,
-  [Move.RIGHT]: moveRight,
-  [Move.LEFT]: moveLeft,
-}
-
-// 90% number 2
-// 10% number 4
-export const newRandomBoardValue = (): number => {
-  return Math.random() < 0.9 ? 2 : 4
-}
-
-// we expect board to have row === columns
-export const randomBoardPosition = (board: Matrix): [number, number] => {
-  const boardLength = board[0].length
-  const randomRow = getRandomInt(boardLength)
-  const randomColumn = getRandomInt(boardLength)
-  return [randomRow, randomColumn]
-}
-
-export const placeValueRandomlyOnBoard = (
-  value: number,
+export type Game = {
+  score: number
+  status: GameStatus
   board: Matrix
-): Matrix => {
-  let randomPosition = randomBoardPosition(board)
-  while (board[randomPosition[0]][randomPosition[1]] !== 0) {
-    randomPosition = randomBoardPosition(board)
-  }
-  return placeValueOnBoard(value, randomPosition, board)
 }
 
-export const placeValueOnBoard = (
-  value: number,
-  position: [number, number],
-  board: Matrix
-): Matrix => {
-  const newBoard = deepArrayCopy(board)
-  newBoard[position[0]][position[1]] = value
-  return newBoard
+export const newGame = (boardSize: number = 4): Game => {
+  return {
+    board: initializeBoard(boardSize),
+    score: 0,
+    status: GameStatus.ACTIVE,
+  }
 }
 
-export const initializeBoard = (size: number = 4): Matrix => {
-  const emptyBoard = newEmptyMatrix(size)
-  return placeValueRandomlyOnBoard(
-    newRandomBoardValue(),
-    placeValueRandomlyOnBoard(newRandomBoardValue(), emptyBoard)
-  )
-}
+export const move = (game: Game, move: Move): Game => {
+  if (game.status !== GameStatus.ACTIVE) {
+    return game
+  }
 
-export const isBoardFull = (board: Matrix): Boolean => {
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[0].length; j++) {
-      if (board[i][j] === 0) {
-        return false
-      }
-    }
-  }
-  return true
-}
+  const newGameUpdate = { ...game }
+  const { matrix, scoreUpdate } = makeMove(move, game.board)
+  newGameUpdate.board = matrix
+  newGameUpdate.score += scoreUpdate
 
-export const boardHas2048 = (board: Matrix): Boolean => {
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[0].length; j++) {
-      if (board[i][j] === 2048) {
-        return true
-      }
-    }
+  if (boardHas2048(matrix)) {
+    newGameUpdate.status = GameStatus.WIN
   }
-  return false
-}
 
-export const boardCanMove = (board: Matrix): Boolean => {
-  if (!isBoardFull(board)) {
-    return true
+  if (!boardCanMove(matrix)) {
+    newGameUpdate.status = GameStatus.LOSS
   }
-  // check equal values in rows
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[0].length; j++) {
-      const nextJ = j + 1
-      if (nextJ < board[0].length) {
-        if (board[i][j] === board[i][nextJ]) {
-          return true
-        }
-      }
-    }
-  }
-  // check equal values in columns
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[0].length; j++) {
-      const nextJ = j + 1
-      if (nextJ < board[0].length) {
-        if (board[j][i] === board[nextJ][i]) {
-          return true
-        }
-      }
-    }
-  }
-  return false
-}
 
-export const makeMove = (move: Move, board: Matrix): Matrix => {
-  const moveFunction = mapMoveToMoveFunction[move]
-  return moveFunction(board)
+  return newGameUpdate
 }
