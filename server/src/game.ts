@@ -39,10 +39,12 @@ export const move = (game: Game, move: Move): Game => {
 
   if (boardHas2048(matrix)) {
     newGameUpdate.status = GameStatus.WIN
+    return newGameUpdate
   }
 
   if (!boardCanMove(matrix)) {
     newGameUpdate.status = GameStatus.LOSS
+    return newGameUpdate
   }
 
   return newGameUpdate
