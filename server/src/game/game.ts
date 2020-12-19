@@ -8,9 +8,9 @@ import {
 import { Matrix } from "./matrix"
 
 export enum GameStatus {
-  LOSS,
-  WIN,
-  ACTIVE,
+  LOSS = "LOSS",
+  WIN = "WIN",
+  ACTIVE = "ACTIVE",
 }
 
 export type Game = {
@@ -53,4 +53,26 @@ export const move = (game: Game, move: Move): Game => {
   }
 
   return newGameUpdate
+}
+
+export const mapToMove = (move: string): Move | null => {
+  let nextMove: Move | null = null
+  switch (move) {
+    case "w":
+      nextMove = Move.UP
+      break
+    case "s":
+      nextMove = Move.DOWN
+      break
+    case "a":
+      nextMove = Move.LEFT
+      break
+    case "d":
+      nextMove = Move.RIGHT
+      break
+    default:
+      nextMove = null
+      break
+  }
+  return nextMove
 }

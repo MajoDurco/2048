@@ -1,64 +1,96 @@
-import { Move } from "./game/board"
-import { newGame, move, Game } from "./game/game"
+import * as express from "express"
+import { createServer } from "http"
+import { Server } from "socket.io"
+import { newGame, mapToMove, move, Game } from "./game/game"
+import createMoves, { Moves } from "./repositories/moves"
+import gameRepository, { GameRepository } from "./repositories/game"
+import { findMostFrequent } from "./game/utils"
 
+enum GameMode {
+  DEMOCRACY = "DEMOCRACY",
+  ANARCHY = "ANARCHY",
+}
 const printGame = (game: Game) => {
   console.log("Status:", game.status)
   console.log("Score:", game.score)
   console.table(game.board)
 }
 
-const findMostFrequent = (array: any[]): any => {
-  if (array.length <= 0) {
-    return null
-  }
-  let hash: { [k: string]: number } = {}
-
-  array.forEach((x) => {
-    if (!hash[x]) hash[x] = 0
-    hash[x]++
-  })
-
-  const hashToArray = Object.entries(hash)
-  const sortedArray = hashToArray.sort((x, y) => y[1] - x[1])
-  return sortedArray[0][0]
+const createGameUpdateWorker = (
+  io: Server,
+  seconds: number,
+  moves: Moves,
+  gameRepository: GameRepository
+): (() => void) => {
+  const interval = setInterval(() => {
+    const m = moves.get()
+    if (m.length > 0) {
+      const nextMove = findMostFrequent(m)
+      console.log("NEXT MOVE", nextMove)
+      moves.clean()
+      const updatedGame = gameRepository.upsert(
+        move(gameRepository.get(), nextMove)
+      )
+      printGame(updatedGame)
+      io.emit("game_update", updatedGame)
+    }
+  }, seconds * 1000)
+  return () => clearInterval(interval)
 }
 
-let gameMovesBuffer: Move[] = []
-let game = newGame(4, 1)
-printGame(game)
+const main = () => {
+  const app = express()
+  const server = createServer(app)
+  const io = new Server(server)
 
-process.stdin.on("readable", () => {
-  const key = Buffer.from(process.stdin.read(), "utf-8").toString().trim()
-  let nextMove: Move | null = null
-  switch (key) {
-    case "w":
-      nextMove = Move.UP
-      break
-    case "s":
-      nextMove = Move.DOWN
-      break
-    case "a":
-      nextMove = Move.LEFT
-      break
-    case "d":
-      nextMove = Move.RIGHT
-      break
-    default:
-      nextMove = null
-      break
-  }
-  if (nextMove !== null) {
-    gameMovesBuffer.push(nextMove)
-  }
-})
+  const port = 3000
+  const game = gameRepository(newGame(4, 0))
+  printGame(game.get())
+  const movesBuffer = createMoves()
 
-setInterval(() => {
-  const nextMove = findMostFrequent(gameMovesBuffer)
-  if (nextMove !== null) {
-    console.log("buffer", gameMovesBuffer)
-    gameMovesBuffer = []
-    console.log("nextMove", nextMove)
-    game = move(game, nextMove)
-    printGame(game)
-  }
-}, 1 * 1000)
+  let gameMode = GameMode.ANARCHY
+  let cleanInterval = createGameUpdateWorker(io, 0, movesBuffer, game)
+
+  io.on("connection", (socket) => {
+    socket.on("move", (move: string) => {
+      const nextMove = mapToMove(move)
+      if (nextMove !== null) {
+        movesBuffer.append(nextMove)
+      }
+    })
+    socket.on("new game", () => {
+      console.log("new game")
+      const g = game.upsert(newGame(4, 0))
+      io.emit("game_update", g)
+    })
+    socket.on("get game", (respond: (g: Game) => void) => {
+      respond(game.get())
+    })
+    socket.on("anarchy", () => {
+      if (gameMode !== GameMode.ANARCHY) {
+        console.log("switching to anarchy")
+        gameMode = GameMode.ANARCHY
+        cleanInterval()
+        cleanInterval = createGameUpdateWorker(io, 0, movesBuffer, game)
+      }
+    })
+    socket.on("democracy", () => {
+      if (gameMode !== GameMode.DEMOCRACY) {
+        console.log("switching to democracy")
+        gameMode = GameMode.DEMOCRACY
+        cleanInterval()
+        cleanInterval = createGameUpdateWorker(io, 5, movesBuffer, game)
+      }
+    })
+  })
+
+  app.get("/health", (_, res) => {
+    res.send("ok")
+  })
+
+  server.listen(port, () => {
+    console.log(`Listening on http://localhost:${port}`)
+  })
+}
+
+main()

@@ -11,10 +11,10 @@ import {
 import { deepArrayCopy, getRandomInt } from "./utils"
 
 export enum Move {
-  UP,
-  DOWN,
-  RIGHT,
-  LEFT,
+  UP = "UP",
+  DOWN = "DOWN",
+  RIGHT = "RIGHT",
+  LEFT = "LEFT",
 }
 
 const mapMoveToMoveFunction = {
