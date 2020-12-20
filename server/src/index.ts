@@ -74,6 +74,9 @@ const main = () => {
       const g = game.upsert(newGame(6, parseInt(stones) || 0))
       io.emit("game updated", g)
     })
+    socket.on("new message", (message: string) => {
+      io.emit("new message", message)
+    })
     socket.on("get game", (respond: (g: Game) => void) => {
       respond(game.get())
     })
