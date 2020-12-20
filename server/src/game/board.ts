@@ -64,13 +64,11 @@ export const initializeBoard = (
   numberOfStones: number = 0
 ): Matrix => {
   let board = newEmptyMatrix(size)
-  // place stones
   Array(numberOfStones)
     .fill(0)
     .forEach(() => {
       board = placeValueRandomlyOnBoard(-1, board)
     })
-  // place 2 initial values
   Array(2)
     .fill(0)
     .forEach(() => {

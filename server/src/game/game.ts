@@ -20,16 +20,22 @@ export type Game = {
   board: Matrix
 }
 
-export const newGame = (
-  boardSize: number = 4,
-  numberOfStones: number = 0
-): Game => {
-  return {
-    board: initializeBoard(boardSize, numberOfStones),
-    stones: numberOfStones,
+export const newGame = (boardSize: number = 4, stones: number = 0): Game => {
+  const board = initializeBoard(boardSize, stones)
+
+  const newGame = {
+    board,
+    stones,
     score: 0,
     status: GameStatus.ACTIVE,
   }
+
+  // in case of large number of stones game can be unplayable
+  if (!boardCanMove(board)) {
+    newGame.status = GameStatus.LOSS
+  }
+
+  return newGame
 }
 
 export const move = (game: Game, move: Move): Game => {
@@ -58,16 +64,16 @@ export const move = (game: Game, move: Move): Game => {
 export const mapToMove = (move: string): Move | null => {
   let nextMove: Move | null = null
   switch (move) {
-    case "w":
+    case "up":
       nextMove = Move.UP
       break
-    case "s":
+    case "down":
       nextMove = Move.DOWN
       break
-    case "a":
+    case "left":
       nextMove = Move.LEFT
       break
-    case "d":
+    case "right":
       nextMove = Move.RIGHT
       break
     default:

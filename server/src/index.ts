@@ -1,6 +1,6 @@
 import * as express from "express"
 import { createServer } from "http"
-import { Server } from "socket.io"
+import * as Server from "socket.io"
 import { newGame, mapToMove, move, Game } from "./game/game"
 import createMoves, { Moves } from "./repositories/moves"
 import gameRepository, { GameRepository } from "./repositories/game"
@@ -17,7 +17,7 @@ const printGame = (game: Game) => {
 }
 
 const createGameUpdateWorker = (
-  io: Server,
+  io: Server.Server,
   seconds: number,
   moves: Moves,
   gameRepository: GameRepository
@@ -32,7 +32,7 @@ const createGameUpdateWorker = (
         move(gameRepository.get(), nextMove)
       )
       printGame(updatedGame)
-      io.emit("game_update", updatedGame)
+      io.emit("game updated", updatedGame)
     }
   }, seconds * 1000)
   return () => clearInterval(interval)
@@ -40,11 +40,22 @@ const createGameUpdateWorker = (
 
 const main = () => {
   const app = express()
-  const server = createServer(app)
-  const io = new Server(server)
 
-  const port = 3000
-  const game = gameRepository(newGame(4, 0))
+  const CORSOptions = {
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    origin: "http://localhost:3000",
+    credentials: true,
+  }
+
+  const httpServer = createServer(app)
+  // @ts-ignore
+  const io = new Server(httpServer, {
+    cors: CORSOptions,
+  })
+
+  const port = 3001
+  const game = gameRepository(newGame(6, 0))
   printGame(game.get())
   const movesBuffer = createMoves()
 
@@ -52,16 +63,16 @@ const main = () => {
   let cleanInterval = createGameUpdateWorker(io, 0, movesBuffer, game)
 
   io.on("connection", (socket) => {
+    io.emit("game updated", game.get())
     socket.on("move", (move: string) => {
       const nextMove = mapToMove(move)
       if (nextMove !== null) {
         movesBuffer.append(nextMove)
       }
     })
-    socket.on("new game", () => {
-      console.log("new game")
-      const g = game.upsert(newGame(4, 0))
-      io.emit("game_update", g)
+    socket.on("new game", (stones: string) => {
+      const g = game.upsert(newGame(6, parseInt(stones) || 0))
+      io.emit("game updated", g)
     })
     socket.on("get game", (respond: (g: Game) => void) => {
       respond(game.get())
@@ -88,7 +99,7 @@ const main = () => {
     res.send("ok")
   })
 
-  server.listen(port, () => {
+  httpServer.listen(port, () => {
     console.log(`Listening on http://localhost:${port}`)
   })
 }
