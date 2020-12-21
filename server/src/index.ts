@@ -26,7 +26,6 @@ const createGameUpdateWorker = (
     const m = moves.get()
     if (m.length > 0) {
       const nextMove = findMostFrequent(m)
-      console.log("NEXT MOVE", nextMove)
       moves.clean()
       const updatedGame = gameRepository.upsert(
         move(gameRepository.get(), nextMove)
@@ -54,12 +53,12 @@ const main = () => {
     cors: CORSOptions,
   })
 
-  const port = 3001
+  const port = process.env.NODE_PORT || 3001
   const game = gameRepository(newGame(6, 0))
+  let gameMode = GameMode.ANARCHY
   printGame(game.get())
   const movesBuffer = createMoves()
 
-  let gameMode = GameMode.ANARCHY
   let cleanInterval = createGameUpdateWorker(io, 0, movesBuffer, game)
 
   io.on("connection", (socket) => {
@@ -84,16 +83,13 @@ const main = () => {
       respond(gameMode)
     })
     socket.on("game mode change", (newMode: string) => {
-      console.log("newMOde", newMode)
       if (newMode === GameMode.ANARCHY && gameMode !== GameMode.ANARCHY) {
-        console.log("switching to anarchy")
         gameMode = GameMode.ANARCHY
         cleanInterval()
         cleanInterval = createGameUpdateWorker(io, 0, movesBuffer, game)
         io.emit("game mode change", gameMode)
       }
       if (newMode === GameMode.DEMOCRACY && gameMode !== GameMode.DEMOCRACY) {
-        console.log("switching to democracy")
         gameMode = GameMode.DEMOCRACY
         cleanInterval()
         cleanInterval = createGameUpdateWorker(io, 5, movesBuffer, game)

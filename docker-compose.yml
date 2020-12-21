@@ -1,0 +1,22 @@
+version: '3'
+services:
+  server:
+    build: ./server
+    ports:
+      - "3001:3001"
+    networks:
+      - net
+    environment:
+      NODE_PORT: 3001
+  client:
+    build: ./client
+    ports:
+      - "3000:8080"
+    networks:
+      - net
+    depends_on:
+      - server
+    environment:
+      SERVER_URL: "http://server:3001"
+networks:
+  net: {}
