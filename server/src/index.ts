@@ -80,20 +80,24 @@ const main = () => {
     socket.on("get game", (respond: (g: Game) => void) => {
       respond(game.get())
     })
-    socket.on("anarchy", () => {
-      if (gameMode !== GameMode.ANARCHY) {
+    socket.on("get game mode", (respond: (mode: GameMode) => void) => {
+      respond(gameMode)
+    })
+    socket.on("game mode change", (newMode: string) => {
+      console.log("newMOde", newMode)
+      if (newMode === GameMode.ANARCHY && gameMode !== GameMode.ANARCHY) {
         console.log("switching to anarchy")
         gameMode = GameMode.ANARCHY
         cleanInterval()
         cleanInterval = createGameUpdateWorker(io, 0, movesBuffer, game)
+        io.emit("game mode change", gameMode)
       }
-    })
-    socket.on("democracy", () => {
-      if (gameMode !== GameMode.DEMOCRACY) {
+      if (newMode === GameMode.DEMOCRACY && gameMode !== GameMode.DEMOCRACY) {
         console.log("switching to democracy")
         gameMode = GameMode.DEMOCRACY
         cleanInterval()
         cleanInterval = createGameUpdateWorker(io, 5, movesBuffer, game)
+        io.emit("game mode change", gameMode)
       }
     })
   })
