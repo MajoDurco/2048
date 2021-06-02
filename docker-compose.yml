@@ -9,7 +9,7 @@ services:
     environment:
       NODE_PORT: 3001
   client:
-    build: ./client
+    build: ./web
     ports:
       - "3000:8080"
     networks:
